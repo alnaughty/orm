@@ -3,7 +3,8 @@ import 'package:orm/src/utils/query_condition.dart';
 
 abstract class Model {
   Adapter get adapter;
-  String? id;
+  final String id;
+  const Model({required this.id});
 
   Map<String, dynamic> toMap();
   Model fromMap(Map<String, dynamic> map);
@@ -22,7 +23,7 @@ abstract class Model {
   }
 
   Stream<List<Model>> watchAll() {
-    return Adapter.defaultInstance.watchAll().map(
+    return adapter.watchAll().map(
       (list) => list.map((e) => fromMap(e)).toList(),
     );
   }
@@ -34,7 +35,7 @@ abstract class Model {
 
     final first = conditions.first;
 
-    return Adapter.defaultInstance
+    return adapter
         .watchWhere(
           first.field,
           isEqualTo: first.isEqualTo,
@@ -54,19 +55,16 @@ abstract class Model {
 
   Future<String?> create() async {
     final data = toMap();
-    final id = await adapter.create(data);
-    this.id = id;
-    return id;
+    final nid = await adapter.create(data);
+    return nid;
   }
 
   Future<void> update() async {
-    if (id == null) throw Exception('Cannot update without ID');
-    await adapter.update(id!, toMap());
+    await adapter.update(id, toMap());
   }
 
   Future<void> delete() async {
-    if (id == null) throw Exception('Cannot delete without ID');
-    await adapter.delete(id!);
+    await adapter.delete(id);
   }
 
   Future<Model?> find(String id) async {
