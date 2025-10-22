@@ -1,41 +1,27 @@
 abstract class Adapter {
+  final String collection;
+  const Adapter(this.collection);
   Future<Map<String, dynamic>?> findOrCreate(
-    String collection,
     String id,
     Map<String, dynamic> data,
   );
-  Future<Map<String, dynamic>?> find(String collection, String id);
+  Future<Map<String, dynamic>?> find(String id);
 
-  Future<List<Map<String, dynamic>>> all(String collection);
+  Future<List<Map<String, dynamic>>> all();
 
-  Future<List<Map<String, dynamic>>> where(
-    String collection,
-    String field,
-    dynamic isEqualTo,
-  );
+  Future<List<Map<String, dynamic>>> where(String field, dynamic isEqualTo);
 
-  Future<String?> create(String collection, Map<String, dynamic> data);
+  Future<String?> create(Map<String, dynamic> data);
 
-  Future<void> update(String collection, String id, Map<String, dynamic> data);
+  Future<void> update(String id, Map<String, dynamic> data);
 
-  Future<bool> delete(String collection, String id);
+  Future<bool> delete(String id);
 
-  Future<void> appendToArray(
-    String collection,
-    String id,
-    String field,
-    dynamic value,
-  );
+  Future<void> appendToArray(String id, String field, dynamic value);
 
-  Future<void> removeFromArray(
-    String collection,
-    String id,
-    String field,
-    dynamic value,
-  );
+  Future<void> removeFromArray(String id, String field, dynamic value);
 
   Future<Map<String, dynamic>?> findWhere(
-    String collection,
     String field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -50,11 +36,9 @@ abstract class Adapter {
     bool? isNull,
   });
 
-  Stream<List<Map<String, dynamic>>> watchAll(String collection) =>
-      const Stream.empty();
+  Stream<List<Map<String, dynamic>>> watchAll() => const Stream.empty();
 
   Stream<List<Map<String, dynamic>>> watchWhere(
-    String collection,
     String field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -69,8 +53,7 @@ abstract class Adapter {
     bool? isNull,
   }) => const Stream.empty();
 
-  Stream<Map<String, dynamic>?> watch(String collection, String id) =>
-      const Stream.empty();
+  Stream<Map<String, dynamic>?> watch(String id) => const Stream.empty();
 
   static late Adapter defaultInstance;
 }

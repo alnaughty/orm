@@ -28,7 +28,7 @@ class QueryBuilder {
   }
 
   Future<List<Map<String, dynamic>>> get() async {
-    List<Map<String, dynamic>> results = await adapter.all(collection);
+    List<Map<String, dynamic>> results = await adapter.all();
 
     _conditions.forEach((field, cond) {
       final op = cond['op'];

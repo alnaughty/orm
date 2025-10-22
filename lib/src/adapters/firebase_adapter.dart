@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'adapter.dart';
 
 class FirebaseAdapter extends Adapter {
-  final FirebaseFirestore _db;
-  FirebaseAdapter(this._db);
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  FirebaseAdapter(super.collection);
 
   @override
   Future<Map<String, dynamic>?> findOrCreate(
-    String collection,
     String id,
     Map<String, dynamic> data,
   ) async {
@@ -24,21 +24,20 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Future<Map<String, dynamic>?> find(String collection, String id) async {
+  Future<Map<String, dynamic>?> find(String id) async {
     final doc = await _db.collection(collection).doc(id).get();
     if (!doc.exists) return null;
     return {'id': doc.id, ...doc.data()!};
   }
 
   @override
-  Future<List<Map<String, dynamic>>> all(String collection) async {
+  Future<List<Map<String, dynamic>>> all() async {
     final snapshot = await _db.collection(collection).get();
     return snapshot.docs.map((d) => {'id': d.id, ...d.data()}).toList();
   }
 
   @override
   Future<List<Map<String, dynamic>>> where(
-    String collection,
     String field,
     dynamic isEqualTo,
   ) async {
@@ -50,7 +49,7 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Future<String?> create(String collection, Map<String, dynamic> data) async {
+  Future<String?> create(Map<String, dynamic> data) async {
     final ref = await _db.collection(collection).add({
       ...data,
       'createdAt': FieldValue.serverTimestamp(),
@@ -60,11 +59,7 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Future<void> update(
-    String collection,
-    String id,
-    Map<String, dynamic> data,
-  ) async {
+  Future<void> update(String id, Map<String, dynamic> data) async {
     await _db.collection(collection).doc(id).set({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -72,7 +67,7 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Future<bool> delete(String collection, String id) async {
+  Future<bool> delete(String id) async {
     try {
       await _db.collection(collection).doc(id).delete();
       return true;
@@ -82,12 +77,7 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Future<void> appendToArray(
-    String collection,
-    String id,
-    String field,
-    dynamic value,
-  ) async {
+  Future<void> appendToArray(String id, String field, dynamic value) async {
     await _db.collection(collection).doc(id).update({
       field: FieldValue.arrayUnion([value]),
       'updatedAt': FieldValue.serverTimestamp(),
@@ -95,12 +85,7 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Future<void> removeFromArray(
-    String collection,
-    String id,
-    String field,
-    dynamic value,
-  ) async {
+  Future<void> removeFromArray(String id, String field, dynamic value) async {
     await _db.collection(collection).doc(id).update({
       field: FieldValue.arrayRemove([value]),
       'updatedAt': FieldValue.serverTimestamp(),
@@ -109,7 +94,6 @@ class FirebaseAdapter extends Adapter {
 
   @override
   Future<Map<String, dynamic>?> findWhere(
-    String collection,
     String field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -147,7 +131,7 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Stream<List<Map<String, dynamic>>> watchAll(String collection) {
+  Stream<List<Map<String, dynamic>>> watchAll() {
     return _db
         .collection(collection)
         .snapshots()
@@ -158,7 +142,6 @@ class FirebaseAdapter extends Adapter {
 
   @override
   Stream<List<Map<String, dynamic>>> watchWhere(
-    String collection,
     String field, {
     Object? isEqualTo,
     Object? isNotEqualTo,
@@ -195,7 +178,7 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Stream<Map<String, dynamic>?> watch(String collection, String id) {
+  Stream<Map<String, dynamic>?> watch(String id) {
     return _db.collection(collection).doc(id).snapshots().map((doc) {
       if (!doc.exists) return null;
       return {'id': doc.id, ...doc.data()!};
