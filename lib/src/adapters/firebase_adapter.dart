@@ -17,6 +17,8 @@ class FirebaseAdapter extends Adapter {
     if (!doc.exists) {
       await docRef.set(data);
       final createdDoc = await docRef.get();
+      final val = createdDoc.data();
+      val?['id'] = createdDoc.id;
       return createdDoc.data();
     } else {
       return doc.data();
