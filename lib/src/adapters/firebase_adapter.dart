@@ -6,6 +6,24 @@ class FirebaseAdapter extends Adapter {
   FirebaseAdapter(this._db);
 
   @override
+  Future<Map<String, dynamic>?> findOrCreate(
+    String collection,
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final docRef = _db.collection(collection).doc(id);
+    final doc = await docRef.get();
+
+    if (!doc.exists) {
+      await docRef.set(data);
+      final createdDoc = await docRef.get();
+      return createdDoc.data();
+    } else {
+      return doc.data();
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>?> find(String collection, String id) async {
     final doc = await _db.collection(collection).doc(id).get();
     if (!doc.exists) return null;

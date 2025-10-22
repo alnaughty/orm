@@ -4,6 +4,31 @@ import 'adapter.dart';
 class SqlAdapter extends Adapter {
   final Database db;
   SqlAdapter(this.db);
+  @override
+  Future<Map<String, dynamic>?> findOrCreate(
+    String collection,
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final result = await db.query(
+      collection,
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) return result.first;
+
+    await db.insert(collection, {'id': id, ...data});
+    final created = await db.query(
+      collection,
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    return created.isNotEmpty ? created.first : null;
+  }
 
   @override
   Future<Map<String, dynamic>?> find(String table, String id) async {

@@ -1,4 +1,9 @@
 abstract class Adapter {
+  Future<Map<String, dynamic>?> findOrCreate(
+    String collection,
+    String id,
+    Map<String, dynamic> data,
+  );
   Future<Map<String, dynamic>?> find(String collection, String id);
 
   Future<List<Map<String, dynamic>>> all(String collection);
