@@ -51,13 +51,18 @@ class FirebaseAdapter extends Adapter {
   }
 
   @override
-  Future<String?> create(Map<String, dynamic> data) async {
-    final ref = await _db.collection(collection).add({
+  Future<String?> create(Map<String, dynamic> data, {String? id}) async {
+    final docRef = id != null
+        ? _db.collection(collection).doc(id)
+        : _db.collection(collection).doc();
+
+    await docRef.set({
       ...data,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
-    return ref.id;
+
+    return docRef.id;
   }
 
   @override
