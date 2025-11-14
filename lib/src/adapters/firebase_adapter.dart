@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:orm/src/utils/query_condition.dart';
 import 'adapter.dart';
 
 class FirebaseAdapter extends Adapter {
@@ -190,5 +191,56 @@ class FirebaseAdapter extends Adapter {
       if (!doc.exists) return null;
       return {'id': doc.id, ...doc.data()!};
     });
+  }
+
+  Stream<List<Map<String, dynamic>>> watchList({
+    List<QueryCondition> conditions = const [],
+  }) {
+    Query query = _db.collection(collection);
+    for (final condition in conditions) {
+      query = query.where(
+        condition.field,
+        isEqualTo: condition.isEqualTo,
+        isNotEqualTo: condition.isNotEqualTo,
+        isLessThan: condition.isLessThan,
+        isLessThanOrEqualTo: condition.isLessThanOrEqualTo,
+        isGreaterThan: condition.isGreaterThan,
+        isGreaterThanOrEqualTo: condition.isGreaterThanOrEqualTo,
+        arrayContains: condition.arrayContains,
+        arrayContainsAny: condition.arrayContainsAny,
+        whereIn: condition.whereIn,
+        whereNotIn: condition.whereNotIn,
+        isNull: condition.isNull,
+      );
+    }
+    return query.snapshots().map(
+      (snapshot) =>
+          snapshot.docs.map((e) => e.data() as Map<String, dynamic>).toList(),
+    );
+  }
+
+  Stream<List<Map<String, dynamic>>> watchQuery({
+    List<QueryCondition> conditions = const [],
+  }) {
+    Query query = _db.collection(collection);
+    for (final condition in conditions) {
+      query = query.where(
+        condition.field,
+        isEqualTo: condition.isEqualTo,
+        isNotEqualTo: condition.isNotEqualTo,
+        isLessThan: condition.isLessThan,
+        isLessThanOrEqualTo: condition.isLessThanOrEqualTo,
+        isGreaterThan: condition.isGreaterThan,
+        isGreaterThanOrEqualTo: condition.isGreaterThanOrEqualTo,
+        arrayContains: condition.arrayContains,
+        arrayContainsAny: condition.arrayContainsAny,
+        whereIn: condition.whereIn,
+        whereNotIn: condition.whereNotIn,
+        isNull: condition.isNull,
+      );
+    }
+    return query.snapshots().map(
+      (snap) => snap.docs.map((e) => e.data() as Map<String, dynamic>).toList(),
+    );
   }
 }
