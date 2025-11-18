@@ -222,10 +222,21 @@ class FirebaseAdapter extends Adapter {
         .where(whereField, isEqualTo: isEqual)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => doc.data()[field])
-              .whereType<int>()
-              .fold(0, (a, b) => a + b);
+          if (snapshot.docs.isEmpty) return 0;
+
+          int sum = 0;
+
+          for (final doc in snapshot.docs) {
+            final data = doc.data();
+            if (!data.containsKey(field)) continue;
+
+            final value = data[field];
+            if (value is int) {
+              sum += value;
+            }
+          }
+
+          return sum;
         });
   }
 }
