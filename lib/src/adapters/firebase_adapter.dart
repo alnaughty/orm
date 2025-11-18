@@ -193,54 +193,39 @@ class FirebaseAdapter extends Adapter {
     });
   }
 
-  Stream<List<Map<String, dynamic>>> watchList({
-    List<QueryCondition> conditions = const [],
+  Stream<List<T>> watchFieldListWhere<T>({
+    required String field,
+    required String whereField,
+    required dynamic isEqual,
   }) {
-    Query query = _db.collection(collection);
-    for (final condition in conditions) {
-      query = query.where(
-        condition.field,
-        isEqualTo: condition.isEqualTo,
-        isNotEqualTo: condition.isNotEqualTo,
-        isLessThan: condition.isLessThan,
-        isLessThanOrEqualTo: condition.isLessThanOrEqualTo,
-        isGreaterThan: condition.isGreaterThan,
-        isGreaterThanOrEqualTo: condition.isGreaterThanOrEqualTo,
-        arrayContains: condition.arrayContains,
-        arrayContainsAny: condition.arrayContainsAny,
-        whereIn: condition.whereIn,
-        whereNotIn: condition.whereNotIn,
-        isNull: condition.isNull,
-      );
-    }
-    return query.snapshots().map(
-      (snapshot) =>
-          snapshot.docs.map((e) => e.data() as Map<String, dynamic>).toList(),
-    );
+    return FirebaseFirestore.instance
+        .collection(collection)
+        .where(whereField, isEqualTo: isEqual)
+        .snapshots()
+        .map((snapshot) {
+          final values = snapshot.docs
+              .map((doc) => doc.data()[field])
+              .whereType<T>()
+              .toList();
+
+          return values;
+        });
   }
 
-  Stream<List<Map<String, dynamic>>> watchQuery({
-    List<QueryCondition> conditions = const [],
+  Stream<int> watchFieldSumWhere({
+    required String field,
+    required String whereField,
+    required dynamic isEqual,
   }) {
-    Query query = _db.collection(collection);
-    for (final condition in conditions) {
-      query = query.where(
-        condition.field,
-        isEqualTo: condition.isEqualTo,
-        isNotEqualTo: condition.isNotEqualTo,
-        isLessThan: condition.isLessThan,
-        isLessThanOrEqualTo: condition.isLessThanOrEqualTo,
-        isGreaterThan: condition.isGreaterThan,
-        isGreaterThanOrEqualTo: condition.isGreaterThanOrEqualTo,
-        arrayContains: condition.arrayContains,
-        arrayContainsAny: condition.arrayContainsAny,
-        whereIn: condition.whereIn,
-        whereNotIn: condition.whereNotIn,
-        isNull: condition.isNull,
-      );
-    }
-    return query.snapshots().map(
-      (snap) => snap.docs.map((e) => e.data() as Map<String, dynamic>).toList(),
-    );
+    return FirebaseFirestore.instance
+        .collection(collection)
+        .where(whereField, isEqualTo: isEqual)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => doc.data()[field])
+              .whereType<int>()
+              .fold(0, (a, b) => a + b);
+        });
   }
 }
