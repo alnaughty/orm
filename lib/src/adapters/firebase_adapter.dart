@@ -212,31 +212,45 @@ class FirebaseAdapter extends Adapter {
         });
   }
 
-  Stream<int> watchFieldSumWhere({
+  Stream<int> watchFieldSum({
+    required String collectionName,
     required String field,
-    required String whereField,
-    required dynamic isEqual,
+    String? whereField,
+    dynamic isEqual,
+    List<QueryCondition> conditions = const [],
   }) {
-    return FirebaseFirestore.instance
-        .collection(collection)
-        .where(whereField, isEqualTo: isEqual)
-        .snapshots()
-        .map((snapshot) {
-          if (snapshot.docs.isEmpty) return 0;
+    Query query = FirebaseFirestore.instance.collection(collectionName);
+    if (whereField != null) {
+      query = query.where(whereField, isEqualTo: isEqual);
+    }
+    for (final condition in conditions) {
+      query = query.where(
+        condition.field,
+        isEqualTo: condition.isEqualTo,
+        isNotEqualTo: condition.isNotEqualTo,
+        isLessThan: condition.isLessThan,
+        isLessThanOrEqualTo: condition.isLessThanOrEqualTo,
+        isGreaterThan: condition.isGreaterThan,
+        isGreaterThanOrEqualTo: condition.isGreaterThanOrEqualTo,
+        arrayContains: condition.arrayContains,
+        arrayContainsAny: condition.arrayContainsAny,
+        whereIn: condition.whereIn,
+        whereNotIn: condition.whereNotIn,
+        isNull: condition.isNull,
+      );
+    }
 
-          int sum = 0;
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs.fold<int>(0, (acc, doc) {
+        final data = doc.data();
+        if (data is! Map<String, dynamic>) return acc;
 
-          for (final doc in snapshot.docs) {
-            final data = doc.data();
-            if (!data.containsKey(field)) continue;
+        final value = data[field];
 
-            final value = data[field];
-            if (value is int) {
-              sum += value;
-            }
-          }
-
-          return sum;
-        });
+        if (value is int) return acc + value;
+        if (value is num) return acc + value.toInt();
+        return acc;
+      });
+    });
   }
 }
