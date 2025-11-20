@@ -213,16 +213,11 @@ class FirebaseAdapter extends Adapter {
   }
 
   Stream<int> watchFieldSum({
-    required String collectionName,
     required String field,
-    String? whereField,
-    dynamic isEqual,
     List<QueryCondition> conditions = const [],
   }) {
-    Query query = FirebaseFirestore.instance.collection(collectionName);
-    if (whereField != null) {
-      query = query.where(whereField, isEqualTo: isEqual);
-    }
+    Query query = _db.collection(collection);
+
     for (final condition in conditions) {
       query = query.where(
         condition.field,
