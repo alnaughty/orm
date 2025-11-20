@@ -212,6 +212,39 @@ class FirebaseAdapter extends Adapter {
         });
   }
 
+  Stream<R> watchWhereConditions<R>(
+    List<QueryCondition> conditions, {
+    required R Function(List<QueryDocumentSnapshot<Object?>> docs) reducer,
+  }) {
+    Query query = _db
+        .collection(collection)
+        .withConverter(
+          fromFirestore: (snap, _) => snap.data() ?? <String, dynamic>{},
+          toFirestore: (value, _) => value as Map<String, dynamic>,
+        );
+
+    for (final condition in conditions) {
+      query = query.where(
+        condition.field,
+        isEqualTo: condition.isEqualTo,
+        isNotEqualTo: condition.isNotEqualTo,
+        isLessThan: condition.isLessThan,
+        isLessThanOrEqualTo: condition.isLessThanOrEqualTo,
+        isGreaterThan: condition.isGreaterThan,
+        isGreaterThanOrEqualTo: condition.isGreaterThanOrEqualTo,
+        arrayContains: condition.arrayContains,
+        arrayContainsAny: condition.arrayContainsAny,
+        whereIn: condition.whereIn,
+        whereNotIn: condition.whereNotIn,
+        isNull: condition.isNull,
+      );
+    }
+    return query.snapshots().map((snapshot) {
+      final docs = snapshot.docs;
+      return reducer(docs);
+    });
+  }
+
   Stream<int> watchFieldSum({
     required String field,
     List<QueryCondition> conditions = const [],
