@@ -216,12 +216,7 @@ class FirebaseAdapter extends Adapter {
     List<QueryCondition> conditions, {
     required R Function(List<QueryDocumentSnapshot<Object?>> docs) reducer,
   }) {
-    Query query = _db
-        .collection(collection)
-        .withConverter(
-          fromFirestore: (snap, _) => snap.data() ?? <String, dynamic>{},
-          toFirestore: (value, _) => value as Map<String, dynamic>,
-        );
+    Query query = _db.collection(collection);
 
     for (final condition in conditions) {
       query = query.where(
